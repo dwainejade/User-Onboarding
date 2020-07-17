@@ -18,45 +18,36 @@ export default function Form() {
     const defaultState = {
         name: "",
         email: "",
-        
+        password: "",
         terms: false
     };
 
     let formSchema = yup.object().shape({
-        name: yup.string().required("Please provide name."),
+        name: yup.string()
+            .required("Please provide name."),
         email: yup
             .string()
             .required("Please provide a email.")
             .email("This is not a valid email."),
-        motivation: yup
+        password: yup
             .string()
-            .required("Please state why you are interested in volunteering."),
-        position: yup.string(),
+            .required("Please create a password.")
+            .min(6, "Password must be at least 6 characters long"),
         terms: yup
             .boolean()
             .oneOf([true], "Please agree to the terms and conditions")
     });
-    
+
     const [formState, setFormState] = useState(defaultState);
     const [errors, setErrors] = useState({ ...defaultState, terms: "" });
     const [buttonDisabled, setButtonDisabled] = useState(true);
-    
+
     useEffect(() => {
+        formSchema.isValid(formState).then(valid => console.log('valid?', valid));
         if (formState.terms) {
             setButtonDisabled(!formState.terms);
         }
     }, [formState]);
-
-    //validate
-    const validateChange = e => {
-        e.persist();
-        if (e.target.value.length === 0) {
-            setErrors({
-                ...errors,
-                [e.target.name]: `${e.target.name} field is required`
-            });
-        }
-    };
 
     // onChange function
     const inputChange = e => {
@@ -69,6 +60,37 @@ export default function Form() {
         validateChange(e);
     };
 
+    const userInfo = {
+        name:"John",
+        email:"john@gmail.com",
+    }
+
+    //validate
+    const validateChange = e => {
+        e.persist();
+        yup
+            .reach(formSchema, e.target.name)
+            .validate(e.target.value)
+            .then(valid =>
+                setErrors({
+                    ...errors,
+                    [e.target.name]: ""
+                })
+            )
+            .catch(error =>
+                setErrors({
+                    ...errors,
+                    [e.target.name]: error.errors[0]
+                })
+            );
+        if (e.target.value.length === 0) {
+            setErrors({
+                ...errors,
+                [e.target.name]: `${e.target.name} field is required`
+            });
+        }
+    };
+
     return (
         <form onSubmit={formSubmit}>
             <label>Name</label>
@@ -79,6 +101,7 @@ export default function Form() {
                 onChange={inputChange}
                 label="Name"
             />
+            {errors.name && <p className="error">{errors.name}</p>}
             <label>Email</label>
             <input
                 type="email"
@@ -88,19 +111,23 @@ export default function Form() {
                 label="Email"
                 errors={errors}
             />
+            {errors.email && <p className="error">{errors.email}</p>}
             <label>Password</label>
             <input
                 type="password"
-                name="motivation"
+                name="password"
+                value={formState.password}
                 onChange={inputChange}
                 label="Password"
-            />
-
+                />
+                {errors.password && <p className="error">{errors.password}</p>}
             <label className="terms" htmlFor="terms">
-                <input name="terms" type="checkbox" />
+                <input name="terms" type="checkbox" value={true} onChange={inputChange} />
                 Terms and Conditions
+                {errors.terms && <p className="error">{errors.terms}</p>}
             </label>
             <button disabled={buttonDisabled}>Submit</button>
+
         </form>
     );
 
