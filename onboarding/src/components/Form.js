@@ -11,7 +11,9 @@ export default function Form() {
 
         axios
             .post("https://reqres.in/api/users", formState)
-            .then(() => console.log("form submitted success"))
+            .then(({ data }) => {
+                setUsers([...users, data]);
+            })
             .catch(err => console.log(err));
     }
 
@@ -41,6 +43,7 @@ export default function Form() {
     const [formState, setFormState] = useState(defaultState);
     const [errors, setErrors] = useState({ ...defaultState, terms: "" });
     const [buttonDisabled, setButtonDisabled] = useState(true);
+    const [users, setUsers] = useState([]);
 
     useEffect(() => {
         formSchema.isValid(formState).then(valid => console.log('valid?', valid));
@@ -59,11 +62,6 @@ export default function Form() {
         });
         validateChange(e);
     };
-
-    const userInfo = {
-        name:"John",
-        email:"john@gmail.com",
-    }
 
     //validate
     const validateChange = e => {
@@ -92,43 +90,57 @@ export default function Form() {
     };
 
     return (
-        <form onSubmit={formSubmit}>
-            <label>Name</label>
-            <input
-                type="text"
-                name="name"
-                value={formState.name}
-                onChange={inputChange}
-                label="Name"
-            />
-            {errors.name && <p className="error">{errors.name}</p>}
-            <label>Email</label>
-            <input
-                type="email"
-                name="email"
-                value={formState.email}
-                onChange={inputChange}
-                label="Email"
-                errors={errors}
-            />
-            {errors.email && <p className="error">{errors.email}</p>}
-            <label>Password</label>
-            <input
-                type="password"
-                name="password"
-                value={formState.password}
-                onChange={inputChange}
-                label="Password"
+        <div>
+            <form onSubmit={formSubmit}>
+                <label>Name</label>
+                <input
+                    type="text"
+                    name="name"
+                    value={formState.name}
+                    onChange={inputChange}
+                    label="Name"
+                />
+                {errors.name && <p className="error">{errors.name}</p>}
+                <label>Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    value={formState.email}
+                    onChange={inputChange}
+                    label="Email"
+                    errors={errors}
+                />
+                {errors.email && <p className="error">{errors.email}</p>}
+                <label>Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    value={formState.password}
+                    onChange={inputChange}
+                    label="Password"
                 />
                 {errors.password && <p className="error">{errors.password}</p>}
-            <label className="terms" htmlFor="terms">
-                <input name="terms" type="checkbox" value={true} onChange={inputChange} />
+                <label className="terms" htmlFor="terms">
+                    <input name="terms" type="checkbox" value={true} onChange={inputChange} />
                 Terms and Conditions
                 {errors.terms && <p className="error">{errors.terms}</p>}
-            </label>
-            <button disabled={buttonDisabled}>Submit</button>
-
-        </form>
+                </label>
+                <button disabled={buttonDisabled}>Submit</button>
+            </form>
+            <div className="users">
+                <h2>Users</h2>
+                <div className="list">
+                    {users.map(user => {
+                        return (
+                            <div className="user">
+                                <p className="name">{user.name}</p>
+                                <small className="email">{user.email}</small>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+        </div>
     );
 
 }
